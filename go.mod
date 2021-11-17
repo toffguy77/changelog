@@ -1,4 +1,4 @@
-module github.com/toffguy77/hangelog
+module github.com/toffguy77/changelog
 
 go 1.17
 
