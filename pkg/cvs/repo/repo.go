@@ -5,13 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"newChangelog/pkg/cvs/commits"
-	"newChangelog/pkg/cvs/tags"
-	"newChangelog/pkg/logger"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/toffguy77/changelog/pkg/logger"
 
 	gogs "github.com/gogs/git-module"
 	"go.uber.org/zap"
@@ -24,12 +23,10 @@ type Repo interface {
 }
 
 type Repository struct {
-	Name    string
-	Path    string
-	URL     string
-	Data    *gogs.Repository
-	Tags    []*tags.Tag
-	Commits []*commits.Commit
+	Name string
+	Path string
+	URL  string
+	Data *gogs.Repository
 }
 
 func getRepoPath(str string) (string, error) {

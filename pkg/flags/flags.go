@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"newChangelog/pkg/logger"
+
+	"github.com/toffguy77/changelog/pkg/logger"
 
 	"go.uber.org/zap"
 )

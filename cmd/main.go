@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"log"
-	"newChangelog/pkg/cvs/repo"
-	"newChangelog/pkg/diff"
-	"newChangelog/pkg/flags"
-	"newChangelog/pkg/logger"
+
+	"github.com/toffguy77/changelog/pkg/cvs/repo"
+	"github.com/toffguy77/changelog/pkg/diff"
+	"github.com/toffguy77/changelog/pkg/flags"
+	"github.com/toffguy77/changelog/pkg/logger"
 
 	"go.uber.org/zap"
 )
