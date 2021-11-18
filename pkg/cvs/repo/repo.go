@@ -30,17 +30,15 @@ type Repository struct {
 }
 
 func getRepoPath(str string) (string, error) {
-	//return "ssh://git@stash.sigma.sbrf.ru:7999/" + str + ".git"
-	if strings.HasPrefix(str, "/") {
-		str = str[1:]
-	}
+	str = strings.TrimPrefix(str, "/")
 	if strings.HasSuffix(str, ".git") {
 		if len(str) < 4 {
 			return "", errors.New("repository name is invalid")
 		}
 		str = str[:len(str)-4]
 	}
-	return "git@github.com:toffguy77/" + str + ".git", nil
+	return "git@github.com:" + str + ".git", nil
+	//return "ssh://git@stash.sigma.sbrf.ru:7999/" + str + ".git", nil
 }
 
 func (r *Repository) Clone(ctx context.Context, path string) error {
@@ -61,7 +59,8 @@ func (r *Repository) Clone(ctx context.Context, path string) error {
 	}
 	zLog.Infof("clone %s to %s directory", pathFrom, tempDir)
 
-	pathTo := filepath.Join(tempDir, path)
+	pathDir := strings.Split(path, "/")[len(strings.Split(path, "/"))-1]
+	pathTo := filepath.Join(tempDir, pathDir)
 
 	if _, err := os.Stat(pathTo); !os.IsNotExist(err) {
 		zLog.Infof("removing temporary directory %s", pathTo)

@@ -9,7 +9,7 @@ import (
 	gogs "github.com/gogs/git-module"
 )
 
-func FormatDiff(ctx context.Context, commits []*gogs.Commit) {
+func FormatDiff(ctx context.Context, commits []*gogs.Commit) []string {
 	var re = regexp.MustCompile(`^\w*[A-Z]+-[0-9]+`)
 	var changes []string
 	for _, commit := range commits {
@@ -22,5 +22,5 @@ func FormatDiff(ctx context.Context, commits []*gogs.Commit) {
 		change := fmt.Sprintf("%s\t%s\t%s", hash, ticketID, message)
 		changes = append(changes, change)
 	}
-	fmt.Println(changes)
+	return changes
 }

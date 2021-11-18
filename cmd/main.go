@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/toffguy77/changelog/pkg/cvs/repo"
@@ -50,6 +51,13 @@ func main() {
 	if err != nil {
 		zLog.Fatalf("can't commits tags: %v", err)
 	}
-	diff.FormatDiff(ctx, commits)
-	//fmt.Println(commits)
+	formattedDiff := diff.FormatDiff(ctx, commits)
+
+	printDiff(formattedDiff)
+}
+
+func printDiff(diff []string) {
+	for _, record := range diff {
+		fmt.Println(record)
+	}
 }
