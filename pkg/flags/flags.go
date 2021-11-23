@@ -4,38 +4,59 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"strings"
 
 	"github.com/toffguy77/changelog/pkg/logger"
-
-	"go.uber.org/zap"
 )
 
-// Parse user input's flags
-func ParseUserFlags(ctx context.Context, repo *string, mode *string, from *string, to *string) error {
-	var loggerName logger.LoggerType
-	loggerName = "ZapLogger"
-	zLog := ctx.Value(loggerName).(*zap.SugaredLogger)
-	defer zLog.Sync()
+type Data struct {
+	RepoName   string
+	Path       string
+	Branch     string
+	StartPoint string
+	EndPoint   string
+}
 
-	flag.StringVar(repo, "repo", "", "repository name")
-	flag.StringVar(mode, "mode", "tags", "calculate diff for tags of commits, tags is default")
-	flag.StringVar(from, "from", "", "start point for diff")
-	flag.StringVar(to, "to", "latest", "end point for diff")
+type DataType string
+
+// Parse user input's flags
+func ParseUserFlags(ctx *context.Context) error {
+	zLog := logger.GetLogger(ctx)
+	defer zLog.Sync()
+	userData := GetData(ctx)
+
+	flag.StringVar(&userData.RepoName, "repo", "", "repository name")
+	flag.StringVar(&userData.Path, "path", "", "repository local path")
+	flag.StringVar(&userData.Branch, "branch", "", "selected branch to checkout")
+	flag.StringVar(&userData.StartPoint, "from", "", "start point for diff")
+	flag.StringVar(&userData.EndPoint, "to", "HEAD", "end point for diff")
 	//TODO: add debug key
 	flag.Parse()
 
 	// Parse repositories from input
-	if *repo == "" {
-		err := errors.New("no repository name was provided")
+	if userData.RepoName == "" && userData.Path == "" {
+		err := errors.New("repository name or local path should be provided")
 		zLog.Errorf("can't parse user input for repository: %v", err)
 		return err
 	}
 
+	if userData.RepoName == "" && userData.Path != "" {
+		data := strings.Split(userData.Path, "/")
+		userData.RepoName = data[len(data)-1]
+	}
+
 	// Check from tag input
-	if *from == "" {
+	if userData.StartPoint == "" {
 		err := errors.New("no start point was provided")
 		zLog.Errorf("can't parse user input for 'from' start point: %v", err)
 		return err
 	}
+
 	return nil
+}
+
+func GetData(ctx *context.Context) *Data {
+	var dataCtx DataType = "dataType"
+	userData := (*ctx).Value(dataCtx).(*Data)
+	return userData
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/toffguy77/changelog/pkg/cvs/repo"
@@ -20,44 +19,35 @@ func main() {
 	if err != nil {
 		log.Fatalf("can't create new zap logger: %v", err)
 	}
-	var (
-		loggerName logger.LoggerType
-	)
-	loggerName = "ZapLogger"
+	var loggerName logger.LoggerType = "ZapLogger"
 	zLog := ctx.Value(loggerName).(*zap.SugaredLogger)
 
-	// Populate variables with user input
 	var (
-		repoName   string
-		mode       string
-		startPoint string
-		endPoint   string
+		dataCtx  flags.DataType = "dataType"
+		userData                = flags.Data{}
 	)
-	err = flags.ParseUserFlags(ctx, &repoName, &mode, &startPoint, &endPoint)
+	ctx = context.WithValue(ctx, dataCtx, &userData)
+	err = flags.ParseUserFlags(&ctx)
 	if err != nil {
 		zLog.Fatalf("can't parse user flags: %v", err)
 	}
-	zLog.Infof("going to work with %s repository starting from the %s start point to the %s\n", repoName, startPoint, endPoint)
+	zLog.Infof("going to work with %s repository starting from the %s start point to the %s", userData.RepoName, userData.StartPoint, userData.EndPoint)
 
 	repository := repo.Repository{
-		Name: repoName,
+		Name: userData.RepoName,
 	}
-	err = repository.Clone(ctx, repoName)
+	err = repository.Clone(&ctx)
 	if err != nil {
-		zLog.Fatalf("can't clone %s repository: %v", repoName, err)
+		zLog.Fatalf("can't clone %s repository: %v", userData.RepoName, err)
 		return
 	}
-	commits, err := repository.DiffTags(ctx, startPoint, endPoint)
+	commits, err := repository.Diff(&ctx)
 	if err != nil {
-		zLog.Fatalf("can't commits tags: %v", err)
+		zLog.Fatalf("can't calculate diff: %v", err)
 	}
-	formattedDiff := diff.FormatDiff(ctx, commits)
-
-	printDiff(formattedDiff)
-}
-
-func printDiff(diff []string) {
-	for _, record := range diff {
-		fmt.Println(record)
+	formattedDiff, err := diff.FormatDiff(&ctx, &repository, commits)
+	if err != nil {
+		zLog.Fatalf("can't get formatted diff: %v", err)
 	}
+	diff.PrintDiff(formattedDiff)
 }
