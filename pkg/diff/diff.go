@@ -13,7 +13,7 @@ import (
 	gogs "github.com/gogs/git-module"
 )
 
-func FormatDiff(ctx *context.Context, r *repo.Repository, commits []*gogs.Commit) ([]string, error) {
+func FormatDiff(ctx *context.Context, r *repo.Repository, commits []*gogs.Commit) ([][]string, error) {
 	zLog := logger.GetLogger(ctx)
 	defer zLog.Sync()
 
@@ -21,8 +21,9 @@ func FormatDiff(ctx *context.Context, r *repo.Repository, commits []*gogs.Commit
 		rePullRequest = regexp.MustCompile(`^(Merge pull request #|Pull request #)`)
 		reTicket      = regexp.MustCompile(`[\w:/][A-Z]+-[0-9]+`)
 	)
-	var changes []string
+	var changes [][]string
 	for _, commit := range commits {
+		change := make([]string, 0, 2)
 		if rePullRequest.FindString(commit.Message) == "" {
 			continue
 		}
@@ -36,7 +37,7 @@ func FormatDiff(ctx *context.Context, r *repo.Repository, commits []*gogs.Commit
 			zLog.Errorf("can't get link for commit: %v", err)
 			return nil, err
 		}
-		change := fmt.Sprintf("%s\t%s", strings.Trim(ticketID, "/"), commitL)
+		change = append(change, strings.Trim(ticketID, "/"), commitL)
 		changes = append(changes, change)
 	}
 	return changes, nil
@@ -51,17 +52,7 @@ func commitLink(ctx *context.Context, r *repo.Repository, c string) (string, err
 	dataList := strings.Split(data, "/")
 
 	project := dataList[len(dataList)-2]
-	repo := dataList[len(dataList)-1]
+	repository := dataList[len(dataList)-1]
 
-	return fmt.Sprintf("https://github.com/%s/%s/commit/%s", project, repo, c), nil
-}
-
-func PrintDiff(diff []string) {
-	if diff == nil {
-		fmt.Println("The are no commit messages with Ticket ID")
-		return
-	}
-	for _, change := range diff {
-		fmt.Println(change)
-	}
+	return fmt.Sprintf("https://github.com/%s/%s/commit/%s", project, repository, c), nil
 }

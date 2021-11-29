@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	"github.com/toffguy77/changelog/pkg/templates"
+
 	"github.com/toffguy77/changelog/pkg/cvs/repo"
 	"github.com/toffguy77/changelog/pkg/diff"
 	"github.com/toffguy77/changelog/pkg/flags"
@@ -45,9 +47,9 @@ func main() {
 	if err != nil {
 		zLog.Fatalf("can't calculate diff: %v", err)
 	}
-	formattedDiff, err := diff.FormatDiff(&ctx, &repository, commits)
+	difference, err := diff.FormatDiff(&ctx, &repository, commits)
 	if err != nil {
 		zLog.Fatalf("can't get formatted diff: %v", err)
 	}
-	diff.PrintDiff(formattedDiff)
+	templates.FillTable(difference)
 }
